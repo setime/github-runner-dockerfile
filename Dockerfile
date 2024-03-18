@@ -1,28 +1,31 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
-ARG RUNNER_VERSION="2.294.0"
+ARG RUNNER_VERSION="2.314.1"
 
 # Prevents installdependencies.sh from prompting the user and blocking the image creation
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y && apt upgrade -y && useradd -m docker
 RUN apt install -y --no-install-recommends \
-    curl jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip
-
-
-RUN cd /home/docker && mkdir actions-runner && cd actions-runner \
-    && curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
-    && tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
-
-RUN chown -R docker ~docker && /home/docker/actions-runner/bin/installdependencies.sh
-
-COPY start.sh start.sh
-
-# make the script executable
-RUN chmod +x start.sh
+    curl jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip libdigest-sha-perl
 
 # since the config and run script for actions are not allowed to be run by root,
 # set the user to "docker" so all subsequent commands are run as the docker user
 USER docker
+WORKDIR /home/docker
+
+RUN mkdir actions-runner && cd actions-runner
+ADD --chown=docker:docker https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz /home/docker/actions-runner
+
+RUN tar xzf /home/docker/actions-runner/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -C /home/docker/actions-runner
+
+USER root
+RUN /home/docker/actions-runner/bin/installdependencies.sh
+
+USER docker
+COPY --chown=docker:docker start.sh start.sh
+
+# make the script executable
+RUN chmod +x start.sh
 
 ENTRYPOINT ["./start.sh"]

@@ -5,12 +5,12 @@ ACCESS_TOKEN=$TOKEN
 
 echo "REPO ${REPOSITORY}"
 echo "ACCESS_TOKEN ${ACCESS_TOKEN}"
-
-REG_TOKEN=$(curl -X POST -H "Authorization: token ${ACCESS_TOKEN}" -H "Accept: application/vnd.github+json" https://api.github.com/repos/${REPOSITORY}/actions/runners/registration-token | jq .token --raw-output)
+echo "LABLE ${LABEL}"
 
 cd /home/docker/actions-runner
 
-./config.sh --url https://github.com/${REPOSITORY} --token ${REG_TOKEN}
+echo "Configure:"
+./config.sh --url ${REPOSITORY} --token ${ACCESS_TOKEN} --labels ${LABEL} --unattended --replace
 
 cleanup() {
     echo "Removing runner..."
@@ -20,4 +20,5 @@ cleanup() {
 trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM
 
+echo "Run:"
 ./run.sh & wait $!

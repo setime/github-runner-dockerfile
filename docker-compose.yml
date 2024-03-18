@@ -1,0 +1,17 @@
+services:
+  runner:
+    build: .
+    container_name: cashless_github_runner
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - REPO=${REPO}
+      - TOKEN=${TOKEN}
+      - LABEL=${LABEL}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.35'
+          memory: 1GB
+          
