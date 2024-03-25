@@ -6,11 +6,12 @@ ACCESS_TOKEN=$TOKEN
 echo "REPO ${REPOSITORY}"
 echo "ACCESS_TOKEN ${ACCESS_TOKEN}"
 echo "LABLE ${LABEL}"
+echo "RUNNER_NAME ${RUNNER_NAME}"
 
 cd /home/docker/actions-runner
 
 echo "Configure:"
-./config.sh --url ${REPOSITORY} --token ${ACCESS_TOKEN} --labels ${LABEL} --unattended --replace
+./config.sh --url ${REPOSITORY} --token ${ACCESS_TOKEN} --labels ${LABEL} --unattended --replace --name ${RUNNER_NAME}
 
 cleanup() {
     echo "Removing runner..."
